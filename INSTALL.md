@@ -1,71 +1,36 @@
 # 安装指南
 
-本指南帮助你在 OpenCode 中安装质量工程师体系的所有 Skill 和 Agent。
+## 方式一：OpenCode Plugin（推荐）
 
-## 前提
+参考 [Superpowers](https://github.com/obra/superpowers) 和 [Anthropic Skills](https://github.com/anthropics/skills) 的实践，使用 OpenCode 原生 plugin 系统安装。
 
-- 已安装 [OpenCode](https://opencode.ai)
-- 已有一个项目目录
-
-## 快速安装
-
-### 1. 复制本仓库到项目根目录
-
-```bash
-# 将 test-craftsman 仓库克隆到项目根目录
-git clone https://github.com/NikoDi2000/test-craftsman.git
-```
-
-或者只复制你需要的部分（见下方"按需安装"）。
-
-### 2. 安装 Agent
-
-将 `agents/` 目录下的 Agent 定义复制到 `.opencode/agents/`：
-
-```bash
-mkdir -p .opencode/agents
-
-cp test-craftsman/agents/测试设计师.md .opencode/agents/
-cp test-craftsman/agents/实现者.md .opencode/agents/
-cp test-craftsman/agents/测试审计员.md .opencode/agents/
-cp test-craftsman/agents/集成测试工程师.md .opencode/agents/
-```
-
-### 3. 安装 Skill
-
-将需要的 Skill 目录复制到 `.opencode/skills/`：
-
-```bash
-mkdir -p .opencode/skills
-
-# 对抗性 TDD（必须）
-cp -r test-craftsman/adversarial-tdd .opencode/skills/
-
-# 属性驱动测试（推荐）
-cp -r test-craftsman/property-based-testing .opencode/skills/
-
-# API 集成测试（FastAPI 项目必须）
-cp -r test-craftsman/api-integration-testing .opencode/skills/
-```
-
-### 4. 安装全局规则
-
-```bash
-mkdir -p .opencode/rules
-
-# ATDD 全局规则
-cp test-craftsman/adversarial-tdd/assets/全局规则模板.md .opencode/rules/测试有效性规则.md
-
-# API 集成测试全局规则
-cp test-craftsman/api-integration-testing/assets/全局规则模板.md .opencode/rules/API集成测试规则.md
-```
-
-### 5. 配置 opencode.json
-
-在项目根目录创建或编辑 `opencode.json`：
+在项目根目录的 `opencode.json` 中添加：
 
 ```json
 {
+  "plugin": ["test-craftsman@git+https://github.com/NikoDi2000/test-craftsman.git"]
+}
+```
+
+重启 OpenCode，plugin 会自动注册所有 Skill 和 Agent。
+
+锁定版本：
+
+```json
+{
+  "plugin": ["test-craftsman@git+https://github.com/NikoDi2000/test-craftsman.git#v1.0.0"]
+}
+```
+
+> **注意**：此方式依赖 OpenCode 的 plugin 系统支持 git 仓库作为 plugin 源。如果你的 OpenCode 版本不支持，请使用方式二。
+
+### 配置 Agent 权限
+
+无论使用哪种安装方式，都需要在 `opencode.json` 中配置 Agent 权限：
+
+```json
+{
+  "plugin": ["test-craftsman@git+https://github.com/NikoDi2000/test-craftsman.git"],
   "agent": {
     "build": {
       "permission": {
@@ -81,160 +46,168 @@ cp test-craftsman/api-integration-testing/assets/全局规则模板.md .opencode
 }
 ```
 
-### 6. 配置全局身份
+按需安装时，只包含对应 Skill 需要的 Agent：
 
-将 `AGENTS.md` 的内容复制到项目根目录的 `.AGENTS.md`：
+| Skill | 需要的 Agent |
+|-------|-------------|
+| adversarial-tdd | 测试设计师 + 实现者 + 测试审计员 |
+| property-based-testing | 测试设计师 |
+| api-integration-testing | 测试设计师 + 集成测试工程师 + 测试审计员 |
 
-```bash
-cp test-craftsman/AGENTS.md .AGENTS.md
-```
+## 方式二：安装脚本
 
-### 7. 重启 OpenCode
-
-```bash
-opencode
-```
-
-## 按需安装
-
-如果你只需要部分功能，可以按以下组合安装：
-
-### 只用对抗性 TDD
+参考 [Claude Code](https://claude.ai/install.sh) 和 [OpenCode](https://opencode.ai/install) 的 `curl | bash` 模式，提供一键安装脚本。
 
 ```bash
-mkdir -p .opencode/agents .opencode/skills .opencode/rules
+# 安装全部（ATDD + PBT + API 集成测试）
+curl -sSL https://raw.githubusercontent.com/NikoDi2000/test-craftsman/main/install.sh | bash -s -- --all
 
-cp test-craftsman/agents/测试设计师.md .opencode/agents/
-cp test-craftsman/agents/实现者.md .opencode/agents/
-cp test-craftsman/agents/测试审计员.md .opencode/agents/
+# 只安装对抗性 TDD
+curl -sSL https://raw.githubusercontent.com/NikoDi2000/test-craftsman/main/install.sh | bash -s -- --atdd
 
-cp -r test-craftsman/adversarial-tdd .opencode/skills/
+# 只安装 API 集成测试
+curl -sSL https://raw.githubusercontent.com/NikoDi2000/test-craftsman/main/install.sh | bash -s -- --api
 
-cp test-craftsman/adversarial-tdd/assets/全局规则模板.md .opencode/rules/测试有效性规则.md
+# 组合安装
+curl -sSL https://raw.githubusercontent.com/NikoDi2000/test-craftsman/main/install.sh | bash -s -- --atdd --api
+
+# 指定目标目录
+curl -sSL https://raw.githubusercontent.com/NikoDi2000/test-craftsman/main/install.sh | bash -s -- --all --dir /path/to/project
 ```
 
-需要的 Agent：测试设计师 + 实现者 + 测试审计员
+安装脚本会：
+1. 临时 clone 仓库到 `/tmp`
+2. 将 Agent 复制到 `.opencode/agents/`
+3. 将 Skill 复制到 `.opencode/skills/`
+4. 将规则复制到 `.opencode/rules/`
+5. 生成 `opencode.json` 配置
+6. 复制 `.AGENTS.md` 全局身份
+7. 清理临时文件
 
-### 只用属性驱动测试
+**安装完成后不需要保留源仓库**，所有文件已复制到 `.opencode/` 目录。
+
+## 方式三：手动安装
+
+参考 [Claude Command Suite](https://github.com/spacescapes/Claude-Command-Suite) 和 [cursorrules](https://github.com/ivangrynenko/cursorrules) 的手动安装模式。
 
 ```bash
-mkdir -p .opencode/agents .opencode/skills
+# 1. 临时 clone
+git clone --depth 1 https://github.com/NikoDi2000/test-craftsman /tmp/test-craftsman
 
-cp test-craftsman/agents/测试设计师.md .opencode/agents/
+# 2. 安装 Agent
+mkdir -p .opencode/agents
+cp /tmp/test-craftsman/agents/*.md .opencode/agents/
 
-cp -r test-craftsman/property-based-testing .opencode/skills/
+# 3. 安装 Skill
+mkdir -p .opencode/skills
+cp -r /tmp/test-craftsman/adversarial-tdd .opencode/skills/
+cp -r /tmp/test-craftsman/property-based-testing .opencode/skills/
+cp -r /tmp/test-craftsman/api-integration-testing .opencode/skills/
+
+# 4. 安装规则
+mkdir -p .opencode/rules
+cp /tmp/test-craftsman/adversarial-tdd/assets/全局规则模板.md .opencode/rules/测试有效性规则.md
+cp /tmp/test-craftsman/api-integration-testing/assets/全局规则模板.md .opencode/rules/API集成测试规则.md
+
+# 5. 配置全局身份
+cp /tmp/test-craftsman/AGENTS.md .AGENTS.md
+
+# 6. 清理
+rm -rf /tmp/test-craftsman
 ```
 
-需要的 Agent：测试设计师
+然后手动创建 `opencode.json`（见上方配置）。
 
-### 只用 API 集成测试
+### 符号链接方式（开发用）
+
+参考 [claude-commands](https://github.com/claude-commands) 的 symlink 模式，适合需要频繁更新的场景：
 
 ```bash
-mkdir -p .opencode/agents .opencode/skills .opencode/rules
+# clone 到固定位置
+git clone https://github.com/NikoDi2000/test-craftsman ~/projects/test-craftsman
 
-cp test-craftsman/agents/测试设计师.md .opencode/agents/
-cp test-craftsman/agents/集成测试工程师.md .opencode/agents/
-cp test-craftsman/agents/测试审计员.md .opencode/agents/
-
-cp -r test-craftsman/api-integration-testing .opencode/skills/
-
-cp test-craftsman/api-integration-testing/assets/全局规则模板.md .opencode/rules/API集成测试规则.md
+# 在项目中创建符号链接
+ln -s ~/projects/test-craftsman/agents .opencode/agents
+ln -s ~/projects/test-craftsman/adversarial-tdd .opencode/skills/adversarial-tdd
+ln -s ~/projects/test-craftsman/property-based-testing .opencode/skills/property-based-testing
+ln -s ~/projects/test-craftsman/api-integration-testing .opencode/skills/api-integration-testing
+ln -s ~/projects/test-craftsman/AGENTS.md .AGENTS.md
 ```
 
-需要的 Agent：测试设计师 + 集成测试工程师 + 测试审计员
+更新时只需 `cd ~/projects/test-craftsman && git pull`。
+
+## 更新
+
+| 安装方式 | 更新方法 |
+|---------|---------|
+| Plugin | 重启 OpenCode 自动拉取最新版本；如未更新，清除 plugin 缓存后重启 |
+| 安装脚本 | 重新运行安装脚本即可覆盖更新 |
+| 符号链接 | `cd ~/projects/test-craftsman && git pull` |
+| 手动安装 | 重新执行手动安装步骤 |
 
 ## 安装后验证
 
-启动 OpenCode 后，尝试以下命令验证安装：
-
-### 验证 ATDD
+启动 OpenCode 后，尝试以下命令：
 
 ```
 请用对抗性TDD帮我实现一个用户注册功能
 ```
 
-预期行为：OpenCode 应调度测试设计师 → 实现者 → 测试审计员 三 Agent 对抗流程。
-
-### 验证属性驱动测试
-
 ```
 请用属性驱动测试验证我的排序函数
 ```
-
-预期行为：OpenCode 应使用测试设计师，通过三个问题发现属性并生成 PBT 测试。
-
-### 验证 API 集成测试
 
 ```
 请为我的 FastAPI 用户端点写集成测试
 ```
 
-预期行为：OpenCode 应调度测试设计师 → 集成测试工程师 → 测试审计员 流程。
+## 项目结构
 
-## 项目结构参考
-
-安装完成后的项目结构：
+安装完成后的结构：
 
 ```
 你的项目/
-├── opencode.json                          # OpenCode 主配置
-├── .AGENTS.md                             # 全局 Agent 身份
-├── .opencode/
-│   ├── agents/                            # Agent 定义
-│   │   ├── 测试设计师.md
-│   │   ├── 实现者.md
-│   │   ├── 测试审计员.md
-│   │   └── 集成测试工程师.md
-│   ├── skills/                            # Skill 定义
-│   │   ├── adversarial-tdd/
-│   │   │   ├── SKILL.md
-│   │   │   ├── references/
-│   │   │   └── assets/
-│   │   ├── property-based-testing/
-│   │   │   ├── SKILL.md
-│   │   │   ├── references/
-│   │   │   └── assets/
-│   │   └── api-integration-testing/
-│   │       ├── SKILL.md
-│   │       ├── references/
-│   │       └── assets/
-│   └── rules/                             # 全局规则
-│       ├── 测试有效性规则.md
-│       └── API集成测试规则.md
-└── test-craftsman/                        # 源仓库（可删除）
-    ├── AGENTS.md
+├── opencode.json
+├── .AGENTS.md
+└── .opencode/
     ├── agents/
-    ├── adversarial-tdd/
-    ├── api-integration-testing/
-    ├── property-based-testing/
-    └── research/
+    │   ├── 测试设计师.md
+    │   ├── 实现者.md
+    │   ├── 测试审计员.md
+    │   └── 集成测试工程师.md
+    ├── skills/
+    │   ├── adversarial-tdd/
+    │   │   ├── SKILL.md
+    │   │   ├── assets/
+    │   │   └── references/
+    │   ├── property-based-testing/
+    │   │   ├── SKILL.md
+    │   │   ├── assets/
+    │   │   └── references/
+    │   └── api-integration-testing/
+    │       ├── SKILL.md
+    │       ├── assets/
+    │       └── references/
+    └── rules/
+        ├── 测试有效性规则.md
+        └── API集成测试规则.md
 ```
-
-## Agent 与 Skill 的协作关系
-
-| Skill | 使用的 Agent | 工作模式 |
-|-------|-------------|---------|
-| adversarial-tdd | 测试设计师 + 实现者 + 测试审计员 | 三 Agent 对抗 |
-| api-integration-testing | 测试设计师 + 集成测试工程师 + 测试审计员 | 设计→验证→审查 |
-| property-based-testing | 测试设计师 | 属性发现 + 生成测试 |
 
 ## 故障排查
 
-| 问题 | 原因 | 解决 |
-|------|------|------|
-| Agent 未触发 | opencode.json 中未授权 | 检查 `agent.build.permission.task` 配置 |
-| Skill 未加载 | SKILL.md 不在正确位置 | 确认 `.opencode/skills/*/SKILL.md` 存在 |
-| 测试设计师看到了实现 | Agent 权限配置错误 | 检查 `.opencode/agents/测试设计师.md` 的 `permission.edit` 是否限制在测试目录 |
-| 测试直接通过 | 已有实现或测试设计有误 | 确认测试在实现前确实失败（红灯） |
-| 审计员未执行 | 工作流中审计阶段被跳过 | 检查 SKILL.md 中的工作流定义 |
-| 规则未生效 | 规则文件不在正确位置 | 确认 `.opencode/rules/` 和 `.AGENTS.md` 存在 |
+| 问题 | 解决 |
+|------|------|
+| Plugin 未加载 | 检查 `opencode.json` 中 `plugin` 字段格式；尝试 `opencode run --print-logs "hello" 2>&1 \| grep -i test-craftsman` |
+| Agent 未触发 | 检查 `opencode.json` 中 `agent.build.permission.task` 是否包含对应 Agent |
+| Skill 未加载 | 确认 `.opencode/skills/*/SKILL.md` 存在且包含 `name` 和 `description` frontmatter |
+| 规则未生效 | 确认 `.opencode/rules/` 和 `.AGENTS.md` 存在 |
+| 测试直接通过 | 确认测试在实现前确实失败（红灯检查） |
+| Windows 安装问题 | 参考 [Superpowers 故障排查](https://github.com/obra/superpowers/blob/main/docs/README.opencode.md)，使用 npm 本地安装后指向本地路径 |
 
-## 技术栈适配
+## 遵循的标准
 
-每个 Skill 都有技术栈特定的参考文档：
+本项目遵循 [Agent Skills Specification](https://agentskills.io/)（由 Anthropic 推动的开放标准）：
 
-| 技术栈 | ATDD 参考 | PBT 参考 | API 集成测试参考 |
-|--------|----------|---------|----------------|
-| Flutter/Dart | `adversarial-tdd/references/06-Flutter技术栈适配.md` | `property-based-testing/references/02-技术栈适配.md` | — |
-| FastAPI/Python | `adversarial-tdd/references/07-FastAPI技术栈适配.md` | `property-based-testing/references/02-技术栈适配.md` | `api-integration-testing/references/03-FastAPI技术栈适配.md` |
-| Unity/C# | `adversarial-tdd/references/08-Unity技术栈适配.md` | `property-based-testing/references/02-技术栈适配.md` | — |
+- 每个 Skill 目录包含 `SKILL.md`，带有 `name` 和 `description` YAML frontmatter
+- 支持渐进式加载：发现（name/description）→ 激活（完整指令）→ 执行（引用资源）
+- 兼容所有支持 Agent Skills 的客户端（Claude Code、OpenCode、Cursor 等）
