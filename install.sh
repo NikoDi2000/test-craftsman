@@ -17,31 +17,27 @@ echo ""
 
 SKILLS=()
 AGENTS=()
-RULES=()
 
 while [[ $# -gt 0 ]]; do
   case $1 in
     --all)
-      SKILLS=("adversarial-tdd" "property-based-testing" "api-integration-testing")
+      SKILLS=("using-test-craftsman" "adversarial-tdd" "property-based-testing" "api-integration-testing")
       AGENTS=("测试设计师" "实现者" "测试审计员" "集成测试工程师")
-      RULES=("测试有效性规则" "API集成测试规则")
       shift
       ;;
     --atdd)
-      SKILLS+=("adversarial-tdd")
+      SKILLS+=("using-test-craftsman" "adversarial-tdd")
       AGENTS+=("测试设计师" "实现者" "测试审计员")
-      RULES+=("测试有效性规则")
       shift
       ;;
     --pbt)
-      SKILLS+=("property-based-testing")
+      SKILLS+=("using-test-craftsman" "property-based-testing")
       AGENTS+=("测试设计师")
       shift
       ;;
     --api)
-      SKILLS+=("api-integration-testing")
+      SKILLS+=("using-test-craftsman" "api-integration-testing")
       AGENTS+=("测试设计师" "集成测试工程师" "测试审计员")
-      RULES+=("API集成测试规则")
       shift
       ;;
     --dir)
@@ -82,8 +78,16 @@ echo "📥 克隆仓库..."
 git clone --depth 1 "$REPO" "$TMPDIR/repo" 2>/dev/null
 
 mkdir -p "$TARGET/.opencode/agents"
-mkdir -p "$TARGET/.opencode/skills"
-mkdir -p "$TARGET/.opencode/rules"
+mkdir -p "$TARGET/.agents/skills"
+
+UNIQUE_SKILLS=()
+declare -A SEEN_SKILLS
+for skill in "${SKILLS[@]}"; do
+  if [[ -z "${SEEN_SKILLS[$skill]+x}" ]]; then
+    UNIQUE_SKILLS+=("$skill")
+    SEEN_SKILLS[$skill]=1
+  fi
+done
 
 UNIQUE_AGENTS=()
 declare -A SEEN_AGENTS
@@ -109,32 +113,14 @@ done
 
 echo ""
 echo "📦 安装 Skill..."
-for skill in "${SKILLS[@]}"; do
+for skill in "${UNIQUE_SKILLS[@]}"; do
   src="$TMPDIR/repo/${skill}"
-  dst="$TARGET/.opencode/skills/${skill}"
+  dst="$TARGET/.agents/skills/${skill}"
   if [[ -d "$src" ]]; then
     cp -r "$src" "$dst"
     echo "  ✅ ${skill}"
   else
     echo "  ⚠️  未找到: ${skill}"
-  fi
-done
-
-echo ""
-echo "📦 安装规则..."
-for rule in "${RULES[@]}"; do
-  case $rule in
-    "测试有效性规则")
-      src="$TMPDIR/repo/adversarial-tdd/assets/全局规则模板.md"
-      ;;
-    "API集成测试规则")
-      src="$TMPDIR/repo/api-integration-testing/assets/全局规则模板.md"
-      ;;
-  esac
-  dst="$TARGET/.opencode/rules/${rule}.md"
-  if [[ -f "$src" ]]; then
-    cp "$src" "$dst"
-    echo "  ✅ ${rule}"
   fi
 done
 
@@ -150,8 +136,8 @@ for i in "${!UNIQUE_AGENTS[@]}"; do
   AGENT_JSON+=$'\n'"          \"${agent}\": \"allow\""
 done
 
-if [[ -f "$TARGET/opencode.json" ]]; then
-  echo "  ⚠️  opencode.json 已存在，请手动添加以下配置："
+if [[ -f "$TARGET/.opencode/opencode.json" ]]; then
+  echo "  ⚠️  .opencode/opencode.json 已存在，请手动添加以下配置："
   echo ""
   echo '  {'
   echo '    "agent": {'
@@ -167,7 +153,8 @@ if [[ -f "$TARGET/opencode.json" ]]; then
   echo '    }'
   echo '  }'
 else
-  cat > "$TARGET/opencode.json" << EOF
+  mkdir -p "$TARGET/.opencode"
+  cat > "$TARGET/.opencode/opencode.json" << EOF
 {
   "agent": {
     "build": {
@@ -179,16 +166,7 @@ else
   }
 }
 EOF
-  echo "  ✅ 已创建 opencode.json"
-fi
-
-echo ""
-echo "📝 配置全局身份..."
-if [[ ! -f "$TARGET/.AGENTS.md" ]]; then
-  cp "$TMPDIR/repo/AGENTS.md" "$TARGET/.AGENTS.md"
-  echo "  ✅ 已创建 .AGENTS.md"
-else
-  echo "  ⚠️  .AGENTS.md 已存在，跳过"
+  echo "  ✅ 已创建 .opencode/opencode.json"
 fi
 
 echo ""
@@ -196,7 +174,6 @@ echo "✨ 安装完成！"
 echo ""
 echo "安装内容："
 echo "  Agent: ${UNIQUE_AGENTS[*]}"
-echo "  Skill: ${SKILLS[*]}"
-echo "  规则: ${RULES[*]}"
+echo "  Skill: ${UNIQUE_SKILLS[*]}"
 echo ""
 echo "请重启 OpenCode 使配置生效。"

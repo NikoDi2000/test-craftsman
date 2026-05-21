@@ -40,11 +40,13 @@ Agent 定义在项目根目录 `agents/` 下，所有 Skill 共享同一套 Agen
 
 | Skill | 使用的 Agent | 工作模式 |
 |-------|-------------|---------|
+| `using-test-craftsman` | — | 入口 Skill，帮助选择正确的 Skill 和 Agent 组合 |
 | `adversarial-tdd` | 测试设计师 + 实现者 + 测试审计员 | 三 Agent 对抗 |
 | `api-integration-testing` | 测试设计师 + 集成测试工程师 + 测试审计员 | 设计→验证→审查 |
 | `property-based-testing` | 测试设计师 | 属性发现 + 生成测试 |
 
 当前已掌握的技能：
+- `using-test-craftsman/`：体系使用指南（Skill 选择、工作流、交接信号、跨 Skill 协作）
 - `adversarial-tdd/`：对抗性测试驱动开发（三Agent模型）
 - `property-based-testing/`：属性驱动测试
 - `api-integration-testing/`：API 集成测试
