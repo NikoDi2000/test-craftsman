@@ -21,22 +21,22 @@ AGENTS=()
 while [[ $# -gt 0 ]]; do
   case $1 in
     --all)
-      SKILLS=("adversarial-tdd" "property-based-testing" "api-integration-testing")
+      SKILLS=("using-test-craftsman" "adversarial-tdd" "property-based-testing" "api-integration-testing")
       AGENTS=("测试设计师" "实现者" "测试审计员" "集成测试工程师")
       shift
       ;;
     --atdd)
-      SKILLS+=("adversarial-tdd")
+      SKILLS+=("using-test-craftsman" "adversarial-tdd")
       AGENTS+=("测试设计师" "实现者" "测试审计员")
       shift
       ;;
     --pbt)
-      SKILLS+=("property-based-testing")
+      SKILLS+=("using-test-craftsman" "property-based-testing")
       AGENTS+=("测试设计师")
       shift
       ;;
     --api)
-      SKILLS+=("api-integration-testing")
+      SKILLS+=("using-test-craftsman" "api-integration-testing")
       AGENTS+=("测试设计师" "集成测试工程师" "测试审计员")
       shift
       ;;
@@ -80,6 +80,15 @@ git clone --depth 1 "$REPO" "$TMPDIR/repo" 2>/dev/null
 mkdir -p "$TARGET/.opencode/agents"
 mkdir -p "$TARGET/.agents/skills"
 
+UNIQUE_SKILLS=()
+declare -A SEEN_SKILLS
+for skill in "${SKILLS[@]}"; do
+  if [[ -z "${SEEN_SKILLS[$skill]+x}" ]]; then
+    UNIQUE_SKILLS+=("$skill")
+    SEEN_SKILLS[$skill]=1
+  fi
+done
+
 UNIQUE_AGENTS=()
 declare -A SEEN_AGENTS
 for agent in "${AGENTS[@]}"; do
@@ -104,7 +113,7 @@ done
 
 echo ""
 echo "📦 安装 Skill..."
-for skill in "${SKILLS[@]}"; do
+for skill in "${UNIQUE_SKILLS[@]}"; do
   src="$TMPDIR/repo/${skill}"
   dst="$TARGET/.agents/skills/${skill}"
   if [[ -d "$src" ]]; then
@@ -165,6 +174,6 @@ echo "✨ 安装完成！"
 echo ""
 echo "安装内容："
 echo "  Agent: ${UNIQUE_AGENTS[*]}"
-echo "  Skill: ${SKILLS[*]}"
+echo "  Skill: ${UNIQUE_SKILLS[*]}"
 echo ""
 echo "请重启 OpenCode 使配置生效。"

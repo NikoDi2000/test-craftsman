@@ -98,6 +98,7 @@ cp /tmp/test-craftsman/agents/*.md .opencode/agents/
 
 # 3. 安装 Skill
 mkdir -p .agents/skills
+cp -r /tmp/test-craftsman/using-test-craftsman .agents/skills/
 cp -r /tmp/test-craftsman/adversarial-tdd .agents/skills/
 cp -r /tmp/test-craftsman/property-based-testing .agents/skills/
 cp -r /tmp/test-craftsman/api-integration-testing .agents/skills/
@@ -118,6 +119,7 @@ git clone https://github.com/NikoDi2000/test-craftsman ~/projects/test-craftsman
 
 # 在项目中创建符号链接
 ln -s ~/projects/test-craftsman/agents .opencode/agents
+ln -s ~/projects/test-craftsman/using-test-craftsman .agents/skills/using-test-craftsman
 ln -s ~/projects/test-craftsman/adversarial-tdd .agents/skills/adversarial-tdd
 ln -s ~/projects/test-craftsman/property-based-testing .agents/skills/property-based-testing
 ln -s ~/projects/test-craftsman/api-integration-testing .agents/skills/api-integration-testing
@@ -165,6 +167,9 @@ ln -s ~/projects/test-craftsman/api-integration-testing .agents/skills/api-integ
 │       └── 集成测试工程师.md
 └── .agents/
     └── skills/
+        ├── using-test-craftsman/
+        │   ├── SKILL.md
+        │   └── references/
         ├── adversarial-tdd/
         │   ├── SKILL.md
         │   ├── assets/
