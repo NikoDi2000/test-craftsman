@@ -117,6 +117,7 @@ for skill in "${UNIQUE_SKILLS[@]}"; do
   src="$TMPDIR/repo/${skill}"
   dst="$TARGET/.agents/skills/${skill}"
   if [[ -d "$src" ]]; then
+    rm -rf "$dst"
     cp -r "$src" "$dst"
     echo "  ✅ ${skill}"
   else
