@@ -145,9 +145,14 @@ if [[ -f "$TARGET/.opencode/opencode.json" ]]; then
   echo '      "build": {'
   echo '        "permission": {'
   echo '          "task": {'
-  for agent in "${UNIQUE_AGENTS[@]}"; do
-    echo "            \"${agent}\": \"allow\","
+  for i in "${!UNIQUE_AGENTS[@]}"; do
+    agent="${UNIQUE_AGENTS[$i]}"
+    if [[ $i -gt 0 ]]; then
+      echo ","
+    fi
+    printf "            \"${agent}\": \"allow\""
   done
+  echo ""
   echo '          }'
   echo '        }'
   echo '      }'
