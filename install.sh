@@ -78,7 +78,7 @@ echo "📥 克隆仓库..."
 git clone --depth 1 "$REPO" "$TMPDIR/repo" 2>/dev/null
 
 mkdir -p "$TARGET/.opencode/agents"
-mkdir -p "$TARGET/.opencode/skills"
+mkdir -p "$TARGET/.agents/skills"
 
 UNIQUE_AGENTS=()
 declare -A SEEN_AGENTS
@@ -106,7 +106,7 @@ echo ""
 echo "📦 安装 Skill..."
 for skill in "${SKILLS[@]}"; do
   src="$TMPDIR/repo/${skill}"
-  dst="$TARGET/.opencode/skills/${skill}"
+  dst="$TARGET/.agents/skills/${skill}"
   if [[ -d "$src" ]]; then
     cp -r "$src" "$dst"
     echo "  ✅ ${skill}"
@@ -144,6 +144,7 @@ if [[ -f "$TARGET/.opencode/opencode.json" ]]; then
   echo '    }'
   echo '  }'
 else
+  mkdir -p "$TARGET/.opencode"
   cat > "$TARGET/.opencode/opencode.json" << EOF
 {
   "agent": {

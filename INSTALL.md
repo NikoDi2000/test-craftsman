@@ -78,11 +78,11 @@ curl -sSL https://raw.githubusercontent.com/NikoDi2000/test-craftsman/main/insta
 安装脚本会：
 1. 临时 clone 仓库到 `/tmp`
 2. 将 Agent 复制到 `.opencode/agents/`
-3. 将 Skill 复制到 `.opencode/skills/`
+3. 将 Skill 复制到 `.agents/skills/`
 4. 生成 `.opencode/opencode.json` 配置
 5. 清理临时文件
 
-**安装完成后不需要保留源仓库**，所有文件已复制到 `.opencode/` 目录。
+**安装完成后不需要保留源仓库**，所有文件已复制到对应目录。
 
 ## 方式三：手动安装
 
@@ -97,10 +97,10 @@ mkdir -p .opencode/agents
 cp /tmp/test-craftsman/agents/*.md .opencode/agents/
 
 # 3. 安装 Skill
-mkdir -p .opencode/skills
-cp -r /tmp/test-craftsman/adversarial-tdd .opencode/skills/
-cp -r /tmp/test-craftsman/property-based-testing .opencode/skills/
-cp -r /tmp/test-craftsman/api-integration-testing .opencode/skills/
+mkdir -p .agents/skills
+cp -r /tmp/test-craftsman/adversarial-tdd .agents/skills/
+cp -r /tmp/test-craftsman/property-based-testing .agents/skills/
+cp -r /tmp/test-craftsman/api-integration-testing .agents/skills/
 
 # 4. 清理
 rm -rf /tmp/test-craftsman
@@ -118,9 +118,9 @@ git clone https://github.com/NikoDi2000/test-craftsman ~/projects/test-craftsman
 
 # 在项目中创建符号链接
 ln -s ~/projects/test-craftsman/agents .opencode/agents
-ln -s ~/projects/test-craftsman/adversarial-tdd .opencode/skills/adversarial-tdd
-ln -s ~/projects/test-craftsman/property-based-testing .opencode/skills/property-based-testing
-ln -s ~/projects/test-craftsman/api-integration-testing .opencode/skills/api-integration-testing
+ln -s ~/projects/test-craftsman/adversarial-tdd .agents/skills/adversarial-tdd
+ln -s ~/projects/test-craftsman/property-based-testing .agents/skills/property-based-testing
+ln -s ~/projects/test-craftsman/api-integration-testing .agents/skills/api-integration-testing
 ```
 
 更新时只需 `cd ~/projects/test-craftsman && git pull`。
@@ -156,13 +156,14 @@ ln -s ~/projects/test-craftsman/api-integration-testing .opencode/skills/api-int
 
 ```
 你的项目/
-└── .opencode/
-    ├── opencode.json
-    ├── agents/
-    │   ├── 测试设计师.md
-    │   ├── 实现者.md
-    │   ├── 测试审计员.md
-    │   └── 集成测试工程师.md
+├── .opencode/
+│   ├── opencode.json
+│   └── agents/
+│       ├── 测试设计师.md
+│       ├── 实现者.md
+│       ├── 测试审计员.md
+│       └── 集成测试工程师.md
+└── .agents/
     └── skills/
         ├── adversarial-tdd/
         │   ├── SKILL.md
@@ -184,7 +185,7 @@ ln -s ~/projects/test-craftsman/api-integration-testing .opencode/skills/api-int
 |------|------|
 | Plugin 未加载 | 检查 `.opencode/opencode.json` 中 `plugin` 字段格式；尝试 `opencode run --print-logs "hello" 2>&1 \| grep -i test-craftsman` |
 | Agent 未触发 | 检查 `.opencode/opencode.json` 中 `agent.build.permission.task` 是否包含对应 Agent |
-| Skill 未加载 | 确认 `.opencode/skills/*/SKILL.md` 存在且包含 `name` 和 `description` frontmatter |
+| Skill 未加载 | 确认 `.agents/skills/*/SKILL.md` 存在且包含 `name` 和 `description` frontmatter |
 | 测试直接通过 | 确认测试在实现前确实失败（红灯检查） |
 | Windows 安装问题 | 参考 [Superpowers 故障排查](https://github.com/obra/superpowers/blob/main/docs/README.opencode.md)，使用 npm 本地安装后指向本地路径 |
 
