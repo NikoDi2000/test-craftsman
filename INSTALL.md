@@ -4,7 +4,7 @@
 
 参考 [Superpowers](https://github.com/obra/superpowers) 和 [Anthropic Skills](https://github.com/anthropics/skills) 的实践，使用 OpenCode 原生 plugin 系统安装。
 
-在项目根目录的 `opencode.json` 中添加：
+在 `.opencode/opencode.json` 中添加：
 
 ```json
 {
@@ -26,7 +26,7 @@
 
 ### 配置 Agent 权限
 
-无论使用哪种安装方式，都需要在 `opencode.json` 中配置 Agent 权限：
+无论使用哪种安装方式，都需要在 `.opencode/opencode.json` 中配置 Agent 权限：
 
 ```json
 {
@@ -79,10 +79,8 @@ curl -sSL https://raw.githubusercontent.com/NikoDi2000/test-craftsman/main/insta
 1. 临时 clone 仓库到 `/tmp`
 2. 将 Agent 复制到 `.opencode/agents/`
 3. 将 Skill 复制到 `.opencode/skills/`
-4. 将规则复制到 `.opencode/rules/`
-5. 生成 `opencode.json` 配置
-6. 复制 `.AGENTS.md` 全局身份
-7. 清理临时文件
+4. 生成 `.opencode/opencode.json` 配置
+5. 清理临时文件
 
 **安装完成后不需要保留源仓库**，所有文件已复制到 `.opencode/` 目录。
 
@@ -104,19 +102,11 @@ cp -r /tmp/test-craftsman/adversarial-tdd .opencode/skills/
 cp -r /tmp/test-craftsman/property-based-testing .opencode/skills/
 cp -r /tmp/test-craftsman/api-integration-testing .opencode/skills/
 
-# 4. 安装规则
-mkdir -p .opencode/rules
-cp /tmp/test-craftsman/adversarial-tdd/assets/全局规则模板.md .opencode/rules/测试有效性规则.md
-cp /tmp/test-craftsman/api-integration-testing/assets/全局规则模板.md .opencode/rules/API集成测试规则.md
-
-# 5. 配置全局身份
-cp /tmp/test-craftsman/AGENTS.md .AGENTS.md
-
-# 6. 清理
+# 4. 清理
 rm -rf /tmp/test-craftsman
 ```
 
-然后手动创建 `opencode.json`（见上方配置）。
+然后手动创建 `.opencode/opencode.json`（见上方配置）。
 
 ### 符号链接方式（开发用）
 
@@ -131,7 +121,6 @@ ln -s ~/projects/test-craftsman/agents .opencode/agents
 ln -s ~/projects/test-craftsman/adversarial-tdd .opencode/skills/adversarial-tdd
 ln -s ~/projects/test-craftsman/property-based-testing .opencode/skills/property-based-testing
 ln -s ~/projects/test-craftsman/api-integration-testing .opencode/skills/api-integration-testing
-ln -s ~/projects/test-craftsman/AGENTS.md .AGENTS.md
 ```
 
 更新时只需 `cd ~/projects/test-craftsman && git pull`。
@@ -167,40 +156,35 @@ ln -s ~/projects/test-craftsman/AGENTS.md .AGENTS.md
 
 ```
 你的项目/
-├── opencode.json
-├── .AGENTS.md
 └── .opencode/
+    ├── opencode.json
     ├── agents/
     │   ├── 测试设计师.md
     │   ├── 实现者.md
     │   ├── 测试审计员.md
     │   └── 集成测试工程师.md
-    ├── skills/
-    │   ├── adversarial-tdd/
-    │   │   ├── SKILL.md
-    │   │   ├── assets/
-    │   │   └── references/
-    │   ├── property-based-testing/
-    │   │   ├── SKILL.md
-    │   │   ├── assets/
-    │   │   └── references/
-    │   └── api-integration-testing/
-    │       ├── SKILL.md
-    │       ├── assets/
-    │       └── references/
-    └── rules/
-        ├── 测试有效性规则.md
-        └── API集成测试规则.md
+    └── skills/
+        ├── adversarial-tdd/
+        │   ├── SKILL.md
+        │   ├── assets/
+        │   └── references/
+        ├── property-based-testing/
+        │   ├── SKILL.md
+        │   ├── assets/
+        │   └── references/
+        └── api-integration-testing/
+            ├── SKILL.md
+            ├── assets/
+            └── references/
 ```
 
 ## 故障排查
 
 | 问题 | 解决 |
 |------|------|
-| Plugin 未加载 | 检查 `opencode.json` 中 `plugin` 字段格式；尝试 `opencode run --print-logs "hello" 2>&1 \| grep -i test-craftsman` |
-| Agent 未触发 | 检查 `opencode.json` 中 `agent.build.permission.task` 是否包含对应 Agent |
+| Plugin 未加载 | 检查 `.opencode/opencode.json` 中 `plugin` 字段格式；尝试 `opencode run --print-logs "hello" 2>&1 \| grep -i test-craftsman` |
+| Agent 未触发 | 检查 `.opencode/opencode.json` 中 `agent.build.permission.task` 是否包含对应 Agent |
 | Skill 未加载 | 确认 `.opencode/skills/*/SKILL.md` 存在且包含 `name` 和 `description` frontmatter |
-| 规则未生效 | 确认 `.opencode/rules/` 和 `.AGENTS.md` 存在 |
 | 测试直接通过 | 确认测试在实现前确实失败（红灯检查） |
 | Windows 安装问题 | 参考 [Superpowers 故障排查](https://github.com/obra/superpowers/blob/main/docs/README.opencode.md)，使用 npm 本地安装后指向本地路径 |
 
